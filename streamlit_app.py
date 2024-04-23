@@ -46,19 +46,18 @@ def preprocess_face_image(face_image, target_size):
     normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
     return normalized_image_array
 def facerec(frame):
-    # frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # face_locations = face_recognition.face_locations(frame_rgb)
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(frame_rgb)
 
-    # for (top, right, bottom, left) in face_locations:
-    #     face_image = frame_rgb[top:bottom, left:right]
-    #     preprocessed_face = preprocess_face_image(Image.fromarray(face_image), (224, 224))
-    #     data_face = np.expand_dims(preprocessed_face, axis=0)
-    #     matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-    #     name = "Unknown"
-    #     if True in matches:
-    #             matched_index = matches.index(True)
-    #             name = known_face_names[matched_index]
-        return "Adithya"       
+    for (top, right, bottom, left) in face_locations:
+        face_encoding = face_recognition.face_encodings(frame_rgb, [(top, right, bottom, left)])[0]
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        name = "Unknown"
+        if True in matches:
+            matched_index = matches.index(True)
+            name = known_face_names[matched_index]
+        return name
+    
 def create_table_if_not_exists(table_name):
     query = f"CREATE TABLE IF NOT EXISTS {table_name} (student_name varchar(20), emotion varchar(20), timestamp timestamp)"
     try:
@@ -136,8 +135,8 @@ def main():
                         finalout = emotion_labels[maxindex]
                         output = str(finalout)
                     label_position = (x, y-10)
-                    cv2.putText(frame, output, label_position, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0),2)
-                    name="Adithya"     
+                    name=facerec(frame)   
+                    cv2.putText(frame, f'{output}{name} ', label_position, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0),2)
                     if (datetime.now() - start_time).seconds >= 15:
                         insert_data_into_table(table_name, name, output, datetime.now())
                         start_time = datetime.now()
