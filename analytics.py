@@ -24,7 +24,7 @@ def derive_analytics(tabname,cur):
             
         # Process the fetched data
         for student, emotion in rows:
-            if student != 'Unknown':
+            if student != 'Unknown' and student != 'unknown':
                 if student not in student_reports:
                     total_students += 1
                     student_reports[student] = {'total_emotions': 0, 'emotions_count': Counter(), 'prominent_emotion': '','understanding': 0, 'notunderstanding':0}
